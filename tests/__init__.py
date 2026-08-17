@@ -1,0 +1,1 @@
+##It makes tests behave as a Python package
