@@ -71,7 +71,54 @@ def relu_back(x : float, grad: float) -> float:
     return grad if x > 0 else 0.0
 
 
-    
+
+#Higher-Oder Functions
+
+def map(fn: Callable[[float], float])-> Callable[[Iterable[float]],Iterable[float]]:
+    """
+    Higher-order map function.
+    Returns a function that applies fn to each element.
+    """
+    def mapped(ls: Iterable[float]) -> Iterable[float]:
+        return [fn(x) for x in ls]
+    return mapped
+
+def zipWith(fn: Callable[[float, float], float]) -> Callable[[Iterable[float],Iterable[float]], Iterable[float]]:
+    """
+    Higher-order zipwith function.
+    returns a function that combines two iterable element-wise
+    """
+    def zipped(ls1: Iterable[float], ls2: Iterable[float]) -> Iterable[float]:
+        return [fn(x, y) for x, y in zip(ls1, ls2)]
+    return zipped
+
+
+def reduce(fn: Callable[[float,float],float], init:float) -> Callable[[Iterable[float]], float]:
+    """
+    Higher-order reduce function.
+    returns a function that reduces an iterable to a single value
+    """
+    def reduced(ls: Iterable[float]) -> float:
+        result = init
+        for x in ls:
+            result = fn(result, x)
+        return result
+    return reduced
+
+#composed functions using higer-order functions
+def negList(ls: Iterable[float]) -> Iterable[float]:
+    return map(neg)(ls)
+
+def addLists(ls1: Iterable[float], ls2: Iterable[float]):
+    return zipWith(add)(ls1, ls2)
+
+def sum(ls: Iterable[float]) -> float:
+    return reduce(add, 0.0)(ls)
+
+def prod(ls: Iterable[float]) -> float:
+    return reduce(mul, 1.0)(ls)
+
+
 
 
 
