@@ -1,0 +1,207 @@
+"""
+Scalar class for autodifferentiation on single values.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Optional, Sequence, Tuple, Type, Union
+
+from .autodiff import Variable
+
+
+@dataclass
+class ScalarHistory:
+    """
+    Records the operation that created a Scalar.
+
+    Attributes:
+        last_fn:
+            The ScalarFunction that created this Scalar.
+
+        ctx:
+            Context containing values needed during backward.
+
+        inputs:
+            Input Scalars used by the operation.
+    """
+
+    last_fn: Optional[Type["ScalarFunction"]] = None
+    ctx: Optional["Context"] = None
+    inputs: Sequence["Scalar"] = ()
+
+
+class Scalar(Variable):
+    """
+    A scalar value that tracks computation history for autodiff.
+
+    Attributes:
+        data:
+            The actual floating-point value.
+
+        history:
+            Record of how this Scalar was computed.
+
+        derivative:
+            Gradient accumulated during the backward pass.
+
+        name:
+            Optional name for debugging.
+    """
+
+    def __init__(
+        self,
+        data: float,
+        history: Optional[ScalarHistory] = None,
+        name: Optional[str] = None,
+        requires_grad: bool = False,
+    ):
+        super().__init__(
+            history=history,
+            derivative=None,
+            name=name,
+            requires_grad=requires_grad,
+        )
+
+        self.data = float(data)
+
+    def __repr__(self) -> str:
+        return f"Scalar({self.data})"
+
+    def __float__(self) -> float:
+        return float(self.data)
+
+    # ---------------------------------------------------------
+    # Comparison operators
+    # ---------------------------------------------------------
+
+    def __lt__(self, other: Union[Scalar, float]) -> bool:
+        other_val = other.data if isinstance(other, Scalar) else other
+        return self.data < other_val
+
+    def __gt__(self, other: Union[Scalar, float]) -> bool:
+        other_val = other.data if isinstance(other, Scalar) else other
+        return self.data > other_val
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, Scalar):
+            return self.data == other.data
+
+        if isinstance(other, (int, float)):
+            return self.data == other
+
+        return False
+
+    # ---------------------------------------------------------
+    # Leaf detection
+    # ---------------------------------------------------------
+
+    def is_leaf(self) -> bool:
+        """
+        Return True if this Scalar was not created by an operation.
+
+        A Scalar with no history is a leaf.
+        """
+        return self.history is None
+
+    # ---------------------------------------------------------
+    # Gradient tracking
+    # ---------------------------------------------------------
+
+    def requires_grad_(
+        self,
+        requires_grad: bool = True,
+    ) -> Scalar:
+        """
+        Enable or disable gradient tracking.
+
+        Returns:
+            This Scalar.
+        """
+        self.requires_grad = requires_grad
+        return self
+
+    # ---------------------------------------------------------
+    # Gradient accumulation
+    # ---------------------------------------------------------
+
+    def accumulate_derivative(self, deriv: float) -> None:
+        """
+        Add a derivative to the accumulated gradient.
+        """
+        if self.derivative is None:
+            self.derivative = deriv
+        else:
+            self.derivative += deriv
+
+    def zero_grad_(self) -> None:
+        """
+        Reset the accumulated gradient.
+        """
+        self.derivative = None
+
+
+    # # Arithmetic operations - delegate to ScalarFunction
+    # # NOTE: These methods reference Add, Mul, Neg, etc. from scalar_functions.py
+    # # They will not work until you complete Chapter 3. The import is added at
+    # # the end of this file to avoid circular imports.
+    # def __add__(self, other: Union[Scalar, float]) -> Scalar:
+    #     return Add.apply(self, other)
+
+    # def __radd__(self, other: Union[Scalar, float]) -> Scalar:
+    #     return Add.apply(other, self)
+
+    # def __mul__(self, other: Union[Scalar, float]) -> Scalar:
+    #     return Mul.apply(self, other)
+
+    # def __rmul__(self, other: Union[Scalar, float]) -> Scalar:
+    #     return Mul.apply(other, self)
+
+    # def __neg__(self) -> Scalar:
+    #     return Neg.apply(self)
+
+    # def __sub__(self, other: Union[Scalar, float]) -> Scalar:
+    #     return Add.apply(self, Neg.apply(other))
+
+    # def __rsub__(self, other: Union[Scalar, float]) -> Scalar:
+    #     return Add.apply(other, Neg.apply(self))
+
+    # def __truediv__(self, other: Union[Scalar, float]) -> Scalar:
+    #     return Mul.apply(self, Inv.apply(other))
+
+    # def __rtruediv__(self, other: Union[Scalar, float]) -> Scalar:
+    #     return Mul.apply(other, Inv.apply(self))
+
+    # def log(self) -> Scalar:
+    #     return Log.apply(self)
+
+    # def exp(self) -> Scalar:
+    #     return Exp.apply(self)
+
+    # def sigmoid(self) -> Scalar:
+    #     return Sigmoid.apply(self)
+
+    # def relu(self) -> Scalar:
+    #     return ReLU.apply(self)
+
+
+class Context:
+    """
+    Storage for values needed during the backward pass.
+    """
+
+    def __init__(self) -> None:
+        self._saved_values: Tuple[float, ...] = ()
+
+    def save_for_backward(self, *values: float) -> None:
+        """
+        Store values needed for computing gradients.
+        """
+        self._saved_values = values
+
+    @property
+    def saved_values(self) -> Tuple[float, ...]:
+        """
+        Return values saved during the forward pass.
+        """
+        return self._saved_values
