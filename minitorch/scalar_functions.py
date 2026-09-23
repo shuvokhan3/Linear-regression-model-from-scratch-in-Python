@@ -174,6 +174,25 @@ class Exp(ScalarFunction):
         # d(e^x)/dx = e^x = result
         return (d_output* result,)
 
+#implement Custome Operation 
+#Implement the square operation (z = x²):
+
+class Square(ScalarFunction):
+    """Square: z = x^2"""
+
+    @staticmethod
+    def forward(ctx: Context, x: float) -> float:
+        ctx.save_for_backward(x)
+        return x * x
+
+    @staticmethod
+    def backward(ctx: Context, d_output: float) -> Tuple[float]:
+        (x, ) = ctx.saved_values
+        return (d_output * 2 * x, )
+
+
+#------------------------
+
 class Sigmoid(ScalarFunction):
     """Sigmoid : z = 1 / (1 + e^(-x))"""
 
