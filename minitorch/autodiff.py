@@ -125,4 +125,30 @@ class History:
     last_fn: Optional[type] = None
     ctx: Optional["Context"] = None
     inputs: Sequence[Variable] = ()
+
+
+def backpropagate(final_var: Variable, deriv: float = 1.0) -> None:
+    """
+    run reversep-mode autodiff starting from final_var.
+    """
+
+    stack = [(final_var, deriv)]
+
+    while stack:
+        var, d = stack.pop()
+
+        #accumulate gradient
+        if hasattr(var, "accumulate_derivative"):
+            var.accumulate_derivative(d)
+
+        #stop if leaf
+        if var.history is None or var.history.last_fn is None:
+            continue
+        h = var.history
+        grads = h.last_fn.backward(h.ctx, d)
+
+        for inp, g in zip(h.inputs, grads):
+            stack.append((inp , g))
+
+        
     
