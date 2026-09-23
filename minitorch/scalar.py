@@ -141,48 +141,48 @@ class Scalar(Variable):
         self.derivative = None
 
 
-    # # Arithmetic operations - delegate to ScalarFunction
-    # # NOTE: These methods reference Add, Mul, Neg, etc. from scalar_functions.py
-    # # They will not work until you complete Chapter 3. The import is added at
-    # # the end of this file to avoid circular imports.
-    # def __add__(self, other: Union[Scalar, float]) -> Scalar:
-    #     return Add.apply(self, other)
+    # Arithmetic operations - delegate to ScalarFunction
+    # NOTE: These methods reference Add, Mul, Neg, etc. from scalar_functions.py
+    # They will not work until you complete Chapter 3. The import is added at
+    # the end of this file to avoid circular imports.
+    def __add__(self, other: Union[Scalar, float]) -> Scalar:
+        return Add.apply(self, other)
 
-    # def __radd__(self, other: Union[Scalar, float]) -> Scalar:
-    #     return Add.apply(other, self)
+    def __radd__(self, other: Union[Scalar, float]) -> Scalar:
+        return Add.apply(other, self)
 
-    # def __mul__(self, other: Union[Scalar, float]) -> Scalar:
-    #     return Mul.apply(self, other)
+    def __mul__(self, other: Union[Scalar, float]) -> Scalar:
+        return Mul.apply(self, other)
 
-    # def __rmul__(self, other: Union[Scalar, float]) -> Scalar:
-    #     return Mul.apply(other, self)
+    def __rmul__(self, other: Union[Scalar, float]) -> Scalar:
+        return Mul.apply(other, self)
 
-    # def __neg__(self) -> Scalar:
-    #     return Neg.apply(self)
+    def __neg__(self) -> Scalar:
+        return Neg.apply(self)
 
-    # def __sub__(self, other: Union[Scalar, float]) -> Scalar:
-    #     return Add.apply(self, Neg.apply(other))
+    def __sub__(self, other: Union[Scalar, float]) -> Scalar:
+        return Add.apply(self, Neg.apply(other))
 
-    # def __rsub__(self, other: Union[Scalar, float]) -> Scalar:
-    #     return Add.apply(other, Neg.apply(self))
+    def __rsub__(self, other: Union[Scalar, float]) -> Scalar:
+        return Add.apply(other, Neg.apply(self))
 
-    # def __truediv__(self, other: Union[Scalar, float]) -> Scalar:
-    #     return Mul.apply(self, Inv.apply(other))
+    def __truediv__(self, other: Union[Scalar, float]) -> Scalar:
+        return Mul.apply(self, Inv.apply(other))
 
-    # def __rtruediv__(self, other: Union[Scalar, float]) -> Scalar:
-    #     return Mul.apply(other, Inv.apply(self))
+    def __rtruediv__(self, other: Union[Scalar, float]) -> Scalar:
+        return Mul.apply(other, Inv.apply(self))
 
-    # def log(self) -> Scalar:
-    #     return Log.apply(self)
+    def log(self) -> Scalar:
+        return Log.apply(self)
 
-    # def exp(self) -> Scalar:
-    #     return Exp.apply(self)
+    def exp(self) -> Scalar:
+        return Exp.apply(self)
 
-    # def sigmoid(self) -> Scalar:
-    #     return Sigmoid.apply(self)
+    def sigmoid(self) -> Scalar:
+        return Sigmoid.apply(self)
 
-    # def relu(self) -> Scalar:
-    #     return ReLU.apply(self)
+    def relu(self) -> Scalar:
+        return ReLU.apply(self)
 
 
 class Context:
@@ -205,3 +205,7 @@ class Context:
         Return values saved during the forward pass.
         """
         return self._saved_values
+
+
+# Import at end of file to avoid circular import
+from .scalar_functions import Add, Mul, Neg, Inv, Log, Exp, Sigmoid, ReLU
