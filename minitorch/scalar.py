@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from typing import Optional, Sequence, Tuple, Type, Union
 
 from .autodiff import Variable
+from .autodiff import backpropagate
 
 
 @dataclass
@@ -91,6 +92,18 @@ class Scalar(Variable):
             return self.data == other
 
         return False
+
+    def backward(self, deriv: float = 1.0) -> None:
+        """
+        Compute gradients for all variable in the computation graph
+
+        Args : 
+            deriv: gradient of this scalar(default 1.0)
+
+        """
+
+        backpropagate(self, deriv)
+
 
     # ---------------------------------------------------------
     # Leaf detection
