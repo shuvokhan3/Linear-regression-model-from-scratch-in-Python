@@ -114,7 +114,7 @@ class Mul(ScalarFunction):
     def backward(ctx: Context, d_output: float) -> Tuple[float, float]:
         x, y = ctx.saved_values
         # d(xy)/dx = y, d(xy)/dy = x
-        return d_output * x, d_output * y
+        return d_output * y, d_output * x
 
 
 class Neg(ScalarFunction):
@@ -157,7 +157,7 @@ class Log(ScalarFunction):
     def backward(ctx: Context, d_output: float) -> Tuple[float]:
         (x,) = ctx.saved_values
         #d(log(x))/dx = 1/x
-        return (d_output / x)
+        return (d_output / x,)
 
 class Exp(ScalarFunction):
     """Exponential: z = e^x"""
