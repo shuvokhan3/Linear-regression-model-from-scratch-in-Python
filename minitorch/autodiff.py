@@ -3,7 +3,7 @@ Automatic differentiation utilities for MiniTorch.
 """
 
 from dataclasses import dataclass
-from typing import Callable, Optional, Sequence
+from typing import Callable, Optional, Sequence ,List, Set
 
 
 def central_difference(
@@ -127,28 +127,97 @@ class History:
     inputs: Sequence[Variable] = ()
 
 
-def backpropagate(final_var: Variable, deriv: float = 1.0) -> None:
+
+
+def topological_sort(variable: Variable) -> List[Variable]:
+
     """
-    run reversep-mode autodiff starting from final_var.
+    return variable in topological order (childeren before parents)
+
+    For backpropagation, a variable must be processed AFTER all variables that depend on it have been processed. 
+
+
+    Args: varible : The output variable (e.g , loss)
+
+    returns: list of variable in topological sort
+
     """
 
-    stack = [(final_var, deriv)]
+    order: List [Variable] = []
+    visited: Set[int] = set()
 
-    while stack:
-        var, d = stack.pop()
+    def visit(var: Variable) -> None:
+        #Use id() to handle variables that might compare equal
+        var_id = id(var)
 
-        #accumulate gradient
-        if hasattr(var, "accumulate_derivative"):
-            var.accumulate_derivative(d)
+        if var_id in visited:
+            return
+        visited.add(var_id)
 
-        #stop if leaf
-        if var.history is None or var.history.last_fn is None:
+        #Visit children first (variables that one depentds on )
+        if var.history is not None and var.history.inputs:
+            for input_var in var.history.inputs:
+                visit(input_var)
+
+        #Add this variable After its children 
+        order.append(var)
+
+    visit(variable)
+    return order 
+
+
+def backpropagate(variable: Variable, deriv: float = 1.0) -> None:
+    """
+    Run backpropagation starting from variable.
+
+    Computes gradients for all variables in the computation graph
+    that require gradients.
+    """
+
+    # Get variables in topological order.
+    sorted_vars = topological_sort(variable)
+
+    # Process output first, then move toward the leaves.
+    sorted_vars.reverse()
+
+    # Gradient of output with respect to itself.
+    variable.derivative = deriv
+
+    for var in sorted_vars:
+
+        # Nothing to propagate if this variable has no derivative.
+        if var.derivative is None:
             continue
-        h = var.history
-        grads = h.last_fn.backward(h.ctx, d)
 
-        for inp, g in zip(h.inputs, grads):
-            stack.append((inp , g))
+        # Leaf variables have no function/history to propagate through.
+        if var.is_leaf():
+            continue
+
+        history = var.history
+
+        if history is None or history.last_fn is None:
+            continue
+
+        # Compute gradients with respect to inputs.
+        input_grads = history.last_fn.backward(
+            history.ctx,
+            var.derivative,
+        )
+
+        # Pass gradients to inputs.
+        for input_var, grad in zip(history.inputs, input_grads):
+
+            if grad is None:
+                continue
+
+            if input_var.requires_grad:
+                input_var.accumulate_derivative(grad)
+
+
+
+
+
+
 
         
     
