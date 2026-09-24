@@ -32,7 +32,7 @@ def simple(N: int) -> Tuple[List[Tuple[float, float]],List[int]]:
         x = random.random()
         y = random.random()
         points.append((x, y))
-        labels.append(1 if x >= 0.5 else 0)
+        labels.append(1 if x >= 0.5 else 0) # using rule i create label data
     return points, labels
 
 
@@ -54,7 +54,7 @@ def diag(N: int) -> Tuple[List[Tuple[float, float]], List[int]]:
         x = random.random()
         y = random.random()
         points.append((x,y))
-        labels.append(1 if x + y >= 1.0 else 0)
+        labels.append(1 if x + y >= 1.0 else 0)# using rule i create label data
     return points, labels
 
 def split(N: int) -> Tuple[List[Tuple[float, float]],List[int]]:
@@ -75,7 +75,7 @@ def split(N: int) -> Tuple[List[Tuple[float, float]],List[int]]:
         x = random.random()
         y = random.random()
         points.append((x, y))
-        labels.append(0 if 0.2 <= x <= 0.8 else 1)
+        labels.append(0 if 0.2 <= x <= 0.8 else 1)# using rule i create label data
     return points, labels
 
 def xor(N: int) -> Tuple[List[Tuple[float, float]],List[int]]:
@@ -99,7 +99,7 @@ def xor(N: int) -> Tuple[List[Tuple[float, float]],List[int]]:
         y = random.random()
         points.append((x, y))
         same_side = (x < 0.5) == (y < 0.5)
-        labels.append(0 if same_side else 1)
+        labels.append(0 if same_side else 1)# using rule i create label data
     return points, labels
 
 
