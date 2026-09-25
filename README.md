@@ -41,7 +41,6 @@ print(b.derivative)   # ∂loss/∂b  ✓
 6. [Step-by-Step Reimplementation Guide](#-step-by-step-reimplementation-guide)
 7. [Getting Started](#-getting-started)
 8. [Running Tests](#-running-tests)
-9. [Data Visualization — Before & After Training](#-data-visualization--before--after-training)
 10. [Example Output](#-example-output)
 11. [Mathematical Reference](#-mathematical-reference)
 12. [What's Next (v2 Roadmap)](#-whats-next-v2-roadmap)
